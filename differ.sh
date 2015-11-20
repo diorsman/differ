@@ -4,8 +4,7 @@ sourceFilePath="$(dirname ${BASH_SOURCE[0]})"
 sourceFileName="$(basename ${BASH_SOURCE[0]})"
 log=$sourceFilePath/$sourceFileName.log
 
-echo '-------Begin-----------' >> $log 2>&1
-echo `date` > $log 2>&1
+echo "-------Begin@`date`-----------" > $log 2>&1
 
 exitArgumentNumberIllegal(){ echo 'ERROR: The number of argument illegal'; exit 1; }
 exitArgumentTypeIllegal(){ echo 'ERROR: The type of argument illegal'; exit 2; }
@@ -26,7 +25,7 @@ checkDiskSpace()
     [ $(( 3 * ( $baseSpace + $targetSpace ) )) -gt $availSpace ] && { return 1; }
 }
 
-echo '-------Check cmd-----------' >> $log 2>&1
+echo "-------Check cmd@`date`-----------" >> $log 2>&1
 `which ruby` -v >> $log 2>&1 || exitCommandNotFound 'ruby'
 `which perl` -v >> $log 2>&1 || exitCommandNotFound 'perl'
 `which tar` --version >> $log 2>&1 || exitCommandNotFound 'tar'
@@ -34,7 +33,7 @@ echo '-------Check cmd-----------' >> $log 2>&1
 echo `which rpm2cpio` | grep "rpm2cpio" >> $log 2>&1 || exitCommandNotFound 'rpm2cpio'
 `which cpio` --version >> $log 2>&1 || exitCommandNotFound 'cpio'
 
-echo '-------Check arg-----------' >> $log 2>&1
+echo "-------Check arg@`date`-----------" >> $log 2>&1
 # Check Arguments
 [ $# -ne 2 ] && { usage; exitArgumentNumberIllegal; }
 
@@ -44,10 +43,10 @@ TARGET=$2
 [ -f $BASE -a -d $TARGET ] && { usage; exitArgumentTypeIllegal; } 
 [ -d $BASE -a -f $TARGET ] && { usage; exitArgumentTypeIllegal; } 
 
-echo '-------Check diskspace-----------' >> $log 2>&1
+echo "-------Check diskspace@`date`-----------" >> $log 2>&1
 checkDiskSpace && { usage; exitDiskSpaceNotEnough; }
 
-echo '-------Prepare base and target-----------' >> $log 2>&1
+echo "-------Prepare base and target@`date`-----------" >> $log 2>&1
 BASETMP="BASE.TMP.DIR"
 TARGETTMP="TARGET.TMP.DIR"
 rm -rf $BASETMP
@@ -67,16 +66,17 @@ fixOnlyOneLine4pl()
     done
 }
 
-echo '-------binary.rb-----------' >> $log 2>&1
+echo "-------binary.rb@`date`-----------" >> $log 2>&1
 ruby $sourceFilePath/lib/binary.rb $BASETMP/`basename $BASE` $TARGETTMP/`basename $TARGET` >> $log 2>&1 
 
-echo '-------fixOnlyOneLine4pl-----------' >> $log 2>&1
+echo "-------fixOnlyOneLine4pl@`date`-----------" >> $log 2>&1
 fixOnlyOneLine4pl $BASETMP/`ls -1 $BASETMP` $TARGETTMP/`ls -1 $TARGETTMP/`
 
-echo '-------differ.pl-----------' >> $log 2>&1
+echo "-------differ.pl@`date`-----------" >> $log 2>&1
 perl $sourceFilePath/lib/differ.pl -r -N -o report.html -t "$BASE    VS    $TARGET" $BASETMP/`ls -1 $BASETMP` $TARGETTMP/`ls -1 $TARGETTMP/` >> $log 2>&1
 
-echo '-------Done-----------' >> $log 2>&1
+echo "-------Done@`date`-----------" >> $log 2>&1
+
 echo 'Done. ^.^'
 echo "The log file: $log"
 echo "The base dir: $BASETMP"
