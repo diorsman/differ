@@ -27,7 +27,6 @@ checkDiskSpace()
 
 echo "-------Check cmd@`date`-----------" >> $log 2>&1
 `which ruby` -v >> $log 2>&1 || exitCommandNotFound 'ruby'
-`which perl` -v >> $log 2>&1 || exitCommandNotFound 'perl'
 `which tar` --version >> $log 2>&1 || exitCommandNotFound 'tar'
 `which zip` -h >> $log 2>&1 || exitCommandNotFound 'zip'
 echo `which rpm2cpio` | grep "rpm2cpio" >> $log 2>&1 || exitCommandNotFound 'rpm2cpio'
@@ -46,6 +45,8 @@ TARGET=$2
 echo "-------Check diskspace@`date`-----------" >> $log 2>&1
 checkDiskSpace && { usage; exitDiskSpaceNotEnough; }
 
+export LC_ALL="en_US.UTF-8"
+
 echo "-------Prepare base and target@`date`-----------" >> $log 2>&1
 BASETMP="BASE.TMP.DIR"
 TARGETTMP="TARGET.TMP.DIR"
@@ -56,24 +57,13 @@ mkdir -p $TARGETTMP
 cp -rf $BASE $BASETMP
 cp -rf $TARGET $TARGETTMP
 
-fixOnlyOneLine4pl()
-{
-    for file in `diff -r -u $1 $2 | grep -E "\-\-\- |\+\+\+ " | awk '{print $2}'`
-    do
-        if [ "1X" == "`wc -l $file | awk '{print $1}'`X" ];then
-            echo "" >> $file
-        fi
-    done
-}
-
 echo "-------binary.rb@`date`-----------" >> $log 2>&1
 ruby $sourceFilePath/lib/binary.rb $BASETMP/`basename $BASE` $TARGETTMP/`basename $TARGET` >> $log 2>&1 
 
-echo "-------fixOnlyOneLine4pl@`date`-----------" >> $log 2>&1
-fixOnlyOneLine4pl $BASETMP/`ls -1 $BASETMP` $TARGETTMP/`ls -1 $TARGETTMP/`
+diff -r -u $BASETMP/`ls -1 $BASETMP` $TARGETTMP/`ls -1 $TARGETTMP/` > differ.diff 2>>$log
 
-echo "-------differ.pl@`date`-----------" >> $log 2>&1
-perl $sourceFilePath/lib/differ.pl -r -N -o report.html -t "$BASE    VS    $TARGET" $BASETMP/`ls -1 $BASETMP` $TARGETTMP/`ls -1 $TARGETTMP/` >> $log 2>&1
+echo "-------diff2html.awk@`date`-----------" >> $log 2>&1
+awk -f $sourceFilePath/lib/diff2html.awk differ.diff > report.html 2>>$log
 
 echo "-------Done@`date`-----------" >> $log 2>&1
 
