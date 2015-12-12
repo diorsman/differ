@@ -60,7 +60,8 @@ cp -rf $TARGET $TARGETTMP
 echo "-------binary.rb@`date`-----------" >> $log 2>&1
 ruby $sourceFilePath/lib/binary.rb $BASETMP/`basename $BASE` $TARGETTMP/`basename $TARGET` >> $log 2>&1 
 
-diff -r -u $BASETMP/`ls -1 $BASETMP` $TARGETTMP/`ls -1 $TARGETTMP/` > differ.diff 2>>$log
+echo "-------diff@`date`-----------" >> $log 2>&1
+diff -t --tabsize=4 -r -u $BASETMP/`ls -1 $BASETMP` $TARGETTMP/`ls -1 $TARGETTMP` > differ.diff 2>>$log
 
 echo "-------diff2html.awk@`date`-----------" >> $log 2>&1
 awk -f $sourceFilePath/lib/diff2html.awk differ.diff > report.html 2>>$log
