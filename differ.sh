@@ -57,6 +57,9 @@ mkdir -p $TARGETTMP
 cp -rf $BASE $BASETMP
 cp -rf $TARGET $TARGETTMP
 
+echo "" > BASE.TMP.DIR.ignore
+echo "" > TARGET.TMP.DIR.ignore
+
 echo "-------binary.rb@`date`-----------" >> $log 2>&1
 ruby $sourceFilePath/lib/binary.rb $BASETMP/`basename $BASE` $TARGETTMP/`basename $TARGET` >> $log 2>&1 
 
@@ -66,6 +69,19 @@ diff -t --tabsize=4 -r -u $BASETMP/`ls -1 $BASETMP` $TARGETTMP/`ls -1 $TARGETTMP
 echo "-------diff2html.awk@`date`-----------" >> $log 2>&1
 awk -f $sourceFilePath/lib/diff2html.awk differ.diff > report.html 2>>$log
 
+echo "-------diff ignore@`date`-----------" >> $log 2>&1
+echo "diff -t -r -u BASE.TMP.DIR.ignore TARGET.TMP.DIR.ignore" > ignore.diff
+for dir in `ls -1 $BASETMP | grep "\.DIR$"`
+do
+    sed -i "s%BASE\.TMP\.DIR/$dir/%%g" BASE.TMP.DIR.ignore
+done
+for dir in `ls -1 $TARGETTMP| grep "\.DIR$"`
+do
+    sed -i "s%TARGET\.TMP\.DIR/$dir/%%g" TARGET.TMP.DIR.ignore
+done
+diff -t --tabsize=4 -u BASE.TMP.DIR.ignore TARGET.TMP.DIR.ignore >> ignore.diff 2>>$log
+awk -f $sourceFilePath/lib/diff2html.awk ignore.diff > ignore.report.html 2>>$log
+
 echo "-------Done@`date`-----------" >> $log 2>&1
 
 echo 'Done. ^.^'
@@ -73,3 +89,4 @@ echo "The log file: $log"
 echo "The base dir: $BASETMP"
 echo "The target dir: $TARGETTMP"
 echo "The report file: report.html"
+echo "The ignore report file: ignore.report.html"
